@@ -1,0 +1,40 @@
+================================================================================
+minifyRegistered plugin
+================================================================================
+collect the registered javascripts and css files and minify them by minify
+(http://code.google.com/p/minify/)
+for the MODX Evolution content management framework
+
+================================================================================
+Features:
+================================================================================
+  * With this plugin all js and css files added by regClientStartupScript, 
+    regClientScript, regClientCSS, regClientStartupHTMLBlock and 
+    regClientHTMLBlock are checked to minify them by minify
+
+================================================================================
+Limitations:
+================================================================================
+  * the media attribute of the link tag is not used by now
+  
+================================================================================
+Please check this:
+================================================================================
+  * parsing of the registered blocks is done PHx/Chunkie and not by the 
+    MODX Parser. Maybe placeholders are not set inside these blocks.
+  
+================================================================================
+Installation:
+================================================================================
+Upload the 'minifyregistered' folder to 'assets/plugins' and create a plugin 
+with the following code
+
+  include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
+
+and check the event 'OnLoadWebDocument' and 'OnWebPagePrerender'.
+
+================================================================================
+Dependencies:
+================================================================================
+The Plugin needs a working installation of minify 
+(http://code.google.com/p/minify/) in the folder /min in the webroot.
