@@ -40,7 +40,7 @@ switch ($e->name) {
                 if (stripos($scriptSrc, '<') === FALSE) {
                     if (substr(trim($scriptSrc), -3) == '.js') {
                         if (trim(dirname(trim($scriptSrc)), '/') == 'assets/js') {
-                            $registeredScripts[$startup.'_jsminjs'][$scriptParam['pos']] = $scriptSrc;
+                            $registeredScripts[$startup.'_jsminjs'][$scriptParam['pos']] = str_replace('assets/js', '', $scriptSrc);
                         } else {
                             $registeredScripts[$startup.'_jsmin'][$scriptParam['pos']] = $scriptSrc;
                         }
@@ -57,7 +57,7 @@ switch ($e->name) {
             // prepare the output of the registered blocks
             $headScripts = $bodyScripts = '';
             if (count($registeredScripts['head_jsminjs'])) {
-                $headScripts .= '<script src="/min/?b=assets/js&f='.implode(',', $registeredScripts['head_jsminjs']).'" type="text/javascript"></script>'."\r\n";
+                $headScripts .= '<script src="/min/?b=assets/js&amp;f='.implode(',', $registeredScripts['head_jsminjs']).'" type="text/javascript"></script>'."\r\n";
             }
             if (count($registeredScripts['head_jsmin'])) {
                 $headScripts .= '<script src="/min/?f='.implode(',', $registeredScripts['head_jsmin']).'" type="text/javascript"></script>'."\r\n";
@@ -66,13 +66,13 @@ switch ($e->name) {
                 $headScripts .= '<link href="/min/?f='.implode(',', $registeredScripts['head_cssmin']).'" rel="stylesheet" type="text/css" />'."\r\n";
             }
             if (count($registeredScripts['head'])) {
-                $headScripts .= "\r\n".implode(',', $registeredScripts['head']);
+                $headScripts .= "\r\n".implode("\r\n", $registeredScripts['head']);
             }
             if (count($registeredScripts['body_jsmin'])) {
                 $bodyScripts .= '<script src="/min/?f='.implode(',', $registeredScripts['body_jsmin']).'" type="text/javascript"></script>'."\r\n";
             }
             if (count($registeredScripts['body'])) {
-                $bodyScripts .= "\r\n".implode(',', $registeredScripts['body']);
+                $bodyScripts .= "\r\n".implode("\r\n", $registeredScripts['body']);
             }
             
             // parse the output of the registered blocks
