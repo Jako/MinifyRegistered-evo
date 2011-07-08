@@ -33,79 +33,82 @@ switch ($e->name) {
                 include (MODX_BASE_PATH.'manager/includes/tmplvars.format.inc.php');
             }
             
-            // collect the registered blocks and assign them to the right document part
             $registeredScripts = array();
-            foreach ($modx->loadedjscripts as $scriptSrc=>$scriptParam) {
-                $startup = ($scriptParam['startup']) ? 'head' : 'body';
-                if (stripos($scriptSrc, '<') === FALSE) {
-                    if (substr(trim($scriptSrc), -3) == '.js') {
-                        if (trim(dirname(trim($scriptSrc)), '/') == 'assets/js') {
-                            $registeredScripts[$startup.'_jsminjs'][$scriptParam['pos']] = str_replace('assets/js', '', $scriptSrc);
+            // Are there any Scripts loaded by $modx->regClient...
+            if (count($modx->loadedjscripts)) {
+                // collect the registered blocks and assign them to the right document part
+                foreach ($modx->loadedjscripts as $scriptSrc=>$scriptParam) {
+                    $startup = ($scriptParam['startup']) ? 'head' : 'body';
+                    if (stripos($scriptSrc, '<') === FALSE) {
+                        if (substr(trim($scriptSrc), -3) == '.js') {
+                            if (trim(dirname(trim($scriptSrc)), '/') == 'assets/js') {
+                                $registeredScripts[$startup.'_jsminjs'][$scriptParam['pos']] = str_replace('assets/js', '', $scriptSrc);
+                            } else {
+                                $registeredScripts[$startup.'_jsmin'][$scriptParam['pos']] = $scriptSrc;
+                            }
+                        } elseif (substr(trim($scriptSrc), -4) == '.css') {
+                            $registeredScripts['head_cssmin'][$scriptParam['pos']] = $scriptSrc;
                         } else {
-                            $registeredScripts[$startup.'_jsmin'][$scriptParam['pos']] = $scriptSrc;
+                            $registeredScripts[$startup][$scriptParam['pos']] = $scriptSrc;
                         }
-                    } elseif (substr(trim($scriptSrc), -4) == '.css') {
-                        $registeredScripts['head_cssmin'][$scriptParam['pos']] = $scriptSrc;
                     } else {
                         $registeredScripts[$startup][$scriptParam['pos']] = $scriptSrc;
                     }
-                } else {
-                    $registeredScripts[$startup][$scriptParam['pos']] = $scriptSrc;
                 }
-            }
-            
-            // prepare the output of the registered blocks
-            $headScripts = $bodyScripts = '';
-            if (count($registeredScripts['head_jsminjs'])) {
-                $headScripts .= '<script src="/min/?b=assets/js&amp;f='.implode(',', $registeredScripts['head_jsminjs']).'" type="text/javascript"></script>'."\r\n";
-            }
-            if (count($registeredScripts['head_jsmin'])) {
-                $headScripts .= '<script src="/min/?f='.implode(',', $registeredScripts['head_jsmin']).'" type="text/javascript"></script>'."\r\n";
-            }
-            if (count($registeredScripts['head_cssmin'])) {
-                $headScripts .= '<link href="/min/?f='.implode(',', $registeredScripts['head_cssmin']).'" rel="stylesheet" type="text/css" />'."\r\n";
-            }
-            if (count($registeredScripts['head'])) {
-                $headScripts .= "\r\n".implode("\r\n", $registeredScripts['head']);
-            }
-            if (count($registeredScripts['body_jsmin'])) {
-                $bodyScripts .= '<script src="/min/?f='.implode(',', $registeredScripts['body_jsmin']).'" type="text/javascript"></script>'."\r\n";
-            }
-            if (count($registeredScripts['body'])) {
-                $bodyScripts .= "\r\n".implode("\r\n", $registeredScripts['body']);
-            }
-            
-            // parse the output of the registered blocks
-            $tmpDocumentObject = array();
-            foreach ($modx->placeholders as $key=>$value) {
-                // add placeholder to the temporary documentObject
-                if ($key != 'phx') {
-                    $tmpDocumentObject[$key] = $value;
+                
+                // prepare the output of the registered blocks
+                $headScripts = $bodyScripts = '';
+                if (count($registeredScripts['head_jsminjs'])) {
+                    $headScripts .= '<script src="/min/?b=assets/js&amp;f='.implode(',', $registeredScripts['head_jsminjs']).'" type="text/javascript"></script>'."\r\n";
                 }
-            }
-            foreach ($modx->documentObject as $key=>$value) {
-                // check for template variables
-                if (is_array($value)) {
-                    $tmpDocumentObject[$key] = getTVDisplayFormat($value[0], $value[1], $value[2], $value[3], $value[4], $modx->documentObject['id']);
-                } else {
-                    $tmpDocumentObject[$key] = $value;
+                if (count($registeredScripts['head_jsmin'])) {
+                    $headScripts .= '<script src="/min/?f='.implode(',', $registeredScripts['head_jsmin']).'" type="text/javascript"></script>'."\r\n";
                 }
+                if (count($registeredScripts['head_cssmin'])) {
+                    $headScripts .= '<link href="/min/?f='.implode(',', $registeredScripts['head_cssmin']).'" rel="stylesheet" type="text/css" />'."\r\n";
+                }
+                if (count($registeredScripts['head'])) {
+                    $headScripts .= "\r\n".implode("\r\n", $registeredScripts['head']);
+                }
+                if (count($registeredScripts['body_jsmin'])) {
+                    $bodyScripts .= '<script src="/min/?f='.implode(',', $registeredScripts['body_jsmin']).'" type="text/javascript"></script>'."\r\n";
+                }
+                if (count($registeredScripts['body'])) {
+                    $bodyScripts .= "\r\n".implode("\r\n", $registeredScripts['body']);
+                }
+                
+                // parse the output of the registered blocks
+                $tmpDocumentObject = array();
+                foreach ($modx->placeholders as $key=>$value) {
+                    // add placeholder to the temporary documentObject
+                    if ($key != 'phx') {
+                        $tmpDocumentObject[$key] = $value;
+                    }
+                }
+                foreach ($modx->documentObject as $key=>$value) {
+                    // check for template variables
+                    if (is_array($value)) {
+                        $tmpDocumentObject[$key] = getTVDisplayFormat($value[0], $value[1], $value[2], $value[3], $value[4], $modx->documentObject['id']);
+                    } else {
+                        $tmpDocumentObject[$key] = $value;
+                    }
+                }
+                
+                $parser = new minifyChunkie('@CODE:'.$headScripts);
+                foreach ($tmpDocumentObject as $key=>$value) {
+                    $parser->AddVar($key, $value);
+                }
+                $headScripts = $parser->Render()."\r\n";
+                
+                $parser = new minifyChunkie('@CODE:'.$bodyScripts);
+                foreach ($tmpDocumentObject as $key=>$value) {
+                    $parser->AddVar($key, $value);
+                }
+                $bodyScripts = $parser->Render()."\r\n";
             }
-            
-            $parser = new minifyChunkie('@CODE:'.$headScripts);
-            foreach ($tmpDocumentObject as $key=>$value) {
-                $parser->AddVar($key, $value);
-            }
-            $headScripts = $parser->Render();
-            
-            $parser = new minifyChunkie('@CODE:'.$bodyScripts);
-            foreach ($tmpDocumentObject as $key=>$value) {
-                $parser->AddVar($key, $value);
-            }
-            $bodyScripts = $parser->Render();
-            
-            $modx->documentOutput = str_replace('##/HEAD##', $headScripts."\r\n".'</head>', $modx->documentOutput);
-            $modx->documentOutput = str_replace('##/BODY##', $bodyScripts."\r\n".'</body>', $modx->documentOutput);
+            // insert the scripts at the end of the head and body
+            $modx->documentOutput = str_replace('##/HEAD##', $headScripts.'</head>', $modx->documentOutput);
+            $modx->documentOutput = str_replace('##/BODY##', $bodyScripts.'</body>', $modx->documentOutput);
         }
 }
 ?>
