@@ -34,7 +34,7 @@ switch ($e->name) {
             }
             
             $registeredScripts = array();
-            // Are there any Scripts loaded by $modx->regClient...
+            // Are there any scripts loaded by $modx->regClient... ?
             if (count($modx->loadedjscripts)) {
                 // collect the registered blocks and assign them to the right document part
                 foreach ($modx->loadedjscripts as $scriptSrc=>$scriptParam) {
@@ -79,11 +79,9 @@ switch ($e->name) {
                 
                 // parse the output of the registered blocks
                 $tmpDocumentObject = array();
-                foreach ($modx->placeholders as $key=>$value) {
+                if (is_array($modx->placeholders)) {
                     // add placeholder to the temporary documentObject
-                    if ($key != 'phx') {
-                        $tmpDocumentObject[$key] = $value;
-                    }
+                    $tmpDocumentObject = $modx->placeholders;
                 }
                 foreach ($modx->documentObject as $key=>$value) {
                     // check for template variables
