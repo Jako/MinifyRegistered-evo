@@ -1,1 +1,3 @@
 0.1   - proof of concept
+0.1.1 - bugfix: the template variables were parsed without any error (blank page)
+        new: groupJs parameter
