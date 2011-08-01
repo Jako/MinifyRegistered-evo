@@ -41,11 +41,13 @@ Parameters:
 Optionally you can alter the plugin configuration with the following config 
 string
 
-  &groupJs=Group minified javascripts in 'assets/js':;list;yes,no;yes
+  &groupJs=Group minified files in 'assets/js':;list;yes,no;yes;
+  &excludeJs=Do not minify following files (separated by |):;text;
   
 If groupJs is set to yes (default) all registered javascripts in 'assets/js' are 
 grouped for minify. Since this could change the inclusion order of the 
 registered javascripts, it could be disabled.
+In excludeJs a comma separated list of files not to be minified can be set 
 
 ================================================================================
 Dependencies:
