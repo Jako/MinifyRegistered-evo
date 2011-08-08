@@ -34,6 +34,10 @@ with the following code
 
 and check the event 'OnLoadWebDocument' and 'OnWebPagePrerender'.
 
+IMPORTANT: The plugin has to work before the Quick Manager Plugin (if you want 
+to use Quick Manager). Edit Plugin Execution Order and drag minifyRegistered 
+plugin before Quick Manager+
+
 ================================================================================
 Parameters:
 ================================================================================
@@ -42,7 +46,7 @@ Optionally you can alter the plugin configuration with the following config
 string
 
   &groupJs=Group minified files in 'assets/js':;list;yes,no;yes;
-  &excludeJs=Do not minify following files (separated by |):;text;
+  &excludeJs=Do not minify following files (comma separated):;text;
   
 If groupJs is set to yes (default) all registered javascripts in 'assets/js' are 
 grouped for minify. Since this could change the inclusion order of the 
