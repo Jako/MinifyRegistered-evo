@@ -2,7 +2,7 @@ minifyRegistered plugin
 ================================================================================
 
 Collect the registered javascripts and css files and minify them by minify
-(http://code.google.com/p/minify/)
+(https://github.com/mrclay/minify)
 for the MODX Evolution content management framework
 
 
