@@ -16,7 +16,7 @@ Installation
 ```
 include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
 ```
-3. Check the event `OnWebPagePrerender` in the plugin configuration (Note 1).
+3. Check the events `OnLoadWebDocument` and `OnWebPagePrerender` in the plugin configuration (Note 1).
 
 Parameters
 --------------------------------------------------------------------------------
@@ -25,28 +25,24 @@ Optionally you can alter the plugin configuration with the following config
 string
 
 ```
-&groupJs=Group minified files in `groupFolder`:;list;yes,no;yes 
-&groupFolder=Group files in this folder with `groupJs` enabled:;text;assets/js 
-&minPath=Path to a working minify installation:;text;/min/ 
-&excludeJs=Comma separated list of files (including pathnames) not to be minified:;text;
+&groupJs=Group minified files in 'assets/js':;list;yes,no;yes;
+&excludeJs=Do not minify following files (comma separated):;text;
 ```
 
 Property | Description | Default
 ---- | ----------- | -------
-groupJs | Group minified files in `groupFolder` (Note 2) | yes
-groupFolder | Group files in this folder with `groupJs` enabled | `assets/js`
-minPath | Path to a working minify installation | `/min/`
-excludeJs | Comma separated list of files (including pathnames) not to be minified | -
+groupJs | All registered javascripts in 'assets/js' are grouped for minify (Note 2) | 1
+excludeJs | Comma separated list of files not to be minified (Note 3) | -
 
 Notes
 --------------------------------------------------------------------------------
-1. The plugin has to work before the Quick Manager+ Plugin (if you want to use Quick Manager+). Edit Plugin Execution Order and drag minifyRegistered plugin before Quick Manager+
+1. The plugin has to work before the Quick Manager Plugin (if you want to use Quick Manager). Edit Plugin Execution Order and drag minifyRegistered plugin before Quick Manager+
 2. Grouping all registered javascripts in `assets/js` could change the inclusion order of the registered javascripts.
-3. Not minified files are included later than the grouped minified and minified files.
-4. Registered chunks (i.e. javascript code) are included at the last position of head/body.
-5. The order of inclusion is *grouped minified*, *minified*, *not minified* and direct code.
-6. The Plugin needs a working installation of minify (https://github.com/mrclay/minify) in the folder /min in the webroot (the path could be changed in plugin configuration).
+3. Not minified files are inserted at the last position of head/body.
+4. The Plugin needs a working installation of minify (https://github.com/mrclay/minify) in the folder /min in the webroot.
+5. Parsing of the registered blocks is done PHx/Chunkie and not by the MODX Parser. Maybe placeholders are not set inside these blocks.
 
 Limitations
 --------------------------------------------------------------------------------
 1. the media attribute of the link tag is not used
+2. to avoid the reordering of the javascript inclusion all snippet calls that are inserting scripts/css by MODX API funktions mentioned above (i.e. `AddHeaderfiles`) have to be called uncached.
