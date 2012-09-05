@@ -1,6 +1,10 @@
 History
 ================================================================================
 
+- 0.2 
+    - rewritten on base of minifyRegistered Revo version
+    - no OnLoadWebDocument event used
+    - works with cached and uncached documents
 - 0.1.3 
     - bugfix: minify javascripts at the end ot the body
 - 0.1.2 
