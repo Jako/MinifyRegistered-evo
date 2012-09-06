@@ -3,12 +3,12 @@
  * MinifyRegistered
  *
  * @category 	plugin
- * @version 	0.2
+ * @version 	0.2.1
  * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author		Jako (thomas.jakobi@partout.info)
  *
  * @internal    Description: 
- *              <strong>0.2</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
+ *              <strong>0.2.1</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
  * @internal    Plugin code:
  *              include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
  * @internal	Events: 
@@ -50,8 +50,11 @@ switch ($e->name) {
 						// if there is no tag in the registered chunk (just a filename)
 						if (substr(trim($scriptSrc), -3) == '.js') {
 							// the registered chunk is a separate javascript
-							if (substr($scriptSrc, 0, 4) == 'http' || in_array($scriptSrc, $excludeJs)) {
-								// do not minify scripts with an external url or scripts in excludeJs
+							if (substr($scriptSrc, 0, 4) == 'http' || substr($scriptSrc, 0, 2) == '//') {
+								// do not minify scripts with an external url
+								$registeredScripts[$startup . '_external'][$scriptParam['pos']] = $scriptSrc;
+							} elseif (in_array($scriptSrc, $excludeJs)) {
+								// do not minify scripts in excludeJs
 								$registeredScripts[$startup . '_nomin'][$scriptParam['pos']] = $scriptSrc;
 							} elseif ($groupJs && (trim(dirname(trim($scriptSrc)), '/') == $groupFolder)) {
 								// group minify scripts in assets/js
@@ -77,6 +80,9 @@ switch ($e->name) {
 				if (count($registeredScripts['head_cssmin'])) {
 					$minifiedScripts['head'] .= '<link href="' . $minPath . '?f=' . implode(',', $registeredScripts['head_cssmin']) . '" rel="stylesheet" type="text/css" />' . "\r\n";
 				}
+				if (count($registeredScripts['head_external'])) {
+					$minifiedScripts['head'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['body_nomin']) . '" type="text/javascript"></script>' . "\r\n";
+				}
 				if (count($registeredScripts['head_jsmingroup'])) {
 					$minifiedScripts['head'] .= '<script src="' . $minPath . '?b=' . $groupFolder . '&amp;f=' . implode(',', $registeredScripts['head_jsmingroup']) . '" type="text/javascript"></script>' . "\r\n";
 				}
@@ -88,6 +94,9 @@ switch ($e->name) {
 				}
 				if (count($registeredScripts['head'])) {
 					$minifiedScripts['head'] .= implode("\r\n", $registeredScripts['head']) . "\r\n";
+				}
+				if (count($registeredScripts['body_external'])) {
+					$minifiedScripts['body'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['body_nomin']) . '" type="text/javascript"></script>' . "\r\n";
 				}
 				if (count($registeredScripts['body_jsmingroup'])) {
 					$minifiedScripts['body'] .= '<script src="' . $minPath . '?b=' . $groupFolder . '&amp;f=' . implode(',', $registeredScripts['body_jsmingroup']) . '" type="text/javascript"></script>' . "\r\n";

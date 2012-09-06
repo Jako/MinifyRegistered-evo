@@ -44,7 +44,7 @@ Notes
 2. Grouping all registered javascripts in `assets/js` could change the inclusion order of the registered javascripts.
 3. Not minified files are included later than the grouped minified and minified files.
 4. Registered chunks (i.e. javascript code) are included at the last position of head/body.
-5. The order of inclusion is *grouped minified*, *minified*, *not minified* and direct code.
+5. The order of inclusion is *external*, *grouped minified*, *minified*, *not minified* and direct code.
 6. The Plugin needs a working installation of minify (https://github.com/mrclay/minify) in the folder /min in the webroot (the path could be changed in plugin configuration).
 
 Limitations

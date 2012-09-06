@@ -1,6 +1,8 @@
 History
 ================================================================================
 
+- 0.2.1
+    - bugfix: external sources are included first 
 - 0.2 
     - rewritten on base of minifyRegistered Revo version
     - OnLoadWebDocument event removed
