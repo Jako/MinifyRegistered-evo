@@ -38,41 +38,79 @@ switch ($e->name) {
 			$clientScripts = $modx->getRegisteredClientScripts();
 
 			// remove inserted registered scripts
-			$output = str_replace($clientStartupScripts . "\n", '', $output);
-			$output = str_replace($clientScripts . "\n", '', $output);
+			if ($clientStartupScripts) {
+				$output = str_replace($clientStartupScripts . "\n", '', $output);
+			}
+			if ($clientScripts) {
+				$output = str_replace($clientScripts . "\n", '', $output);
+			}
+			// if minified scripts not cached, collect them
+				$startupScripts = explode("\n", $clientStartupScripts);
+				$scripts = explode("\n", $clientScripts);
 
-			// Are there any scripts loaded by $modx->regClient... ?
-			if (count($modx->loadedjscripts)) {
-				// collect the registered blocks and assign them to the right document part
-				foreach ($modx->loadedjscripts as $scriptSrc => $scriptParam) {
-					$startup = ($scriptParam['startup']) ? 'head' : 'body';
-					if (strpos($scriptSrc, '<') === FALSE) {
-						// if there is no tag in the registered chunk (just a filename)
-						if (substr(trim($scriptSrc), -3) == '.js') {
+				// startup scripts
+				foreach ($startupScripts as $scriptSrc) {
+					preg_match('/^<(script|link)[^>]+>/', trim($scriptSrc), $tag);
+					if (preg_match('/(src|href)=\"([^\"]+)/', $tag[0], $src)) {
+						// if there is a filename referenced in the registered line
+						if (substr(trim($src[2]), -3) == '.js') {
 							// the registered chunk is a separate javascript
-							if (substr($scriptSrc, 0, 4) == 'http' || substr($scriptSrc, 0, 2) == '//') {
+							if (substr($src[2], 0, 4) == 'http' || substr($src[2], 0, 2) == '//') {
 								// do not minify scripts with an external url
-								$registeredScripts[$startup . '_external'][$scriptParam['pos']] = $scriptSrc;
-							} elseif (in_array($scriptSrc, $excludeJs)) {
+								$registeredScripts['head_external'][] = $src[2];
+							} elseif (in_array($src[2], $excludeJs)) {
 								// do not minify scripts in excludeJs
-								$registeredScripts[$startup . '_nomin'][$scriptParam['pos']] = $scriptSrc;
-							} elseif ($groupJs && (trim(dirname(trim($scriptSrc)), '/') == $groupFolder)) {
+								$registeredScripts['head_nomin'][] = $src[2];
+							} elseif ($groupJs && (trim(dirname(trim($src[2])), '/') == $groupFolder)) {
 								// group minify scripts in assets/js
-								$registeredScripts[$startup . '_jsmingroup'][$scriptParam['pos']] = trim(str_replace($groupFolder, '', $scriptSrc), '/');
+								$registeredScripts['head_jsmingroup'][] = trim(str_replace($groupFolder, '', $src[2]), '/');
 							} else {
 								// minify scripts
-								$registeredScripts[$startup . '_jsmin'][$scriptParam['pos']] = $scriptSrc;
+								$registeredScripts['head_jsmin'][] = $src[2];
 							}
-						} elseif (substr(trim($scriptSrc), -4) == '.css') {
+						} elseif (substr(trim($src[2]), -4) == '.css') {
 							// minify css
-							$registeredScripts['head_cssmin'][$scriptParam['pos']] = $scriptSrc;
+							$registeredScripts['head_cssmin'][] = $src[2];
 						} else {
 							// do not minify any other file
-							$registeredScripts[$startup . '_nomin'][$scriptParam['pos']] = $scriptSrc;
+							$registeredScripts['head_nomin'][] = $src[2];
 						}
 					} else {
-						// if there is any tag in the registered chunk leave it alone
-						$registeredScripts[$startup][$scriptParam['pos']] = $scriptSrc;
+						// if there is no filename referenced in the registered line leave it alone
+						$registeredScripts['head'][] = $scriptSrc;
+					}
+				}
+
+				// body scripts
+				foreach ($scripts as $scriptSrc) {
+					preg_match('/^<(script|link)[^>]+>/', trim($scriptSrc), $tag);
+					if (preg_match('/(src|href)=\"([^\"]+)/', $tag[0], $src)) {
+						// if there is a filename referenced in the registered line
+						if (substr(trim($src[2]), -3) == '.js') {
+							// the registered chunk is a separate javascript
+							if (substr($src[2], 0, 4) == 'http' || substr($src[2], 0, 2) == '//') {
+								// do not minify scripts with an external url
+								$registeredScripts['body_external'][] = $src[2];
+							} elseif (in_array($src[2], $excludeJs)) {
+								// do not minify scripts in excludeJs
+								$registeredScripts['body_nomin'][] = $src[2];
+							} elseif ($groupJs && (trim(dirname(trim($src[2])), '/') == $groupFolder)) {
+								// group minify scripts in assets/js
+								$registeredScripts['body_jsmingroup'][] = trim(str_replace($groupFolder, '', $src[2]), '/');
+							} else {
+								// minify scripts
+								$registeredScripts['body_jsmin'][] = $src[2];
+							}
+						} elseif (substr(trim($src[2]), -4) == '.css') {
+							// minify css
+							$registeredScripts['body_cssmin'][] = $src[2];
+						} else {
+							// do not minify any other file
+							$registeredScripts['body_nomin'][] = $src[2];
+						}
+					} else {
+						// if there is no filename referenced in the registered line leave it alone
+						$registeredScripts['body'][] = $scriptSrc;
 					}
 				}
 
@@ -81,7 +119,7 @@ switch ($e->name) {
 					$minifiedScripts['head'] .= '<link href="' . $minPath . '?f=' . implode(',', $registeredScripts['head_cssmin']) . '" rel="stylesheet" type="text/css" />' . "\r\n";
 				}
 				if (count($registeredScripts['head_external'])) {
-					$minifiedScripts['head'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['body_nomin']) . '" type="text/javascript"></script>' . "\r\n";
+					$minifiedScripts['head'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['head_external']) . '" type="text/javascript"></script>' . "\r\n";
 				}
 				if (count($registeredScripts['head_jsmingroup'])) {
 					$minifiedScripts['head'] .= '<script src="' . $minPath . '?b=' . $groupFolder . '&amp;f=' . implode(',', $registeredScripts['head_jsmingroup']) . '" type="text/javascript"></script>' . "\r\n";
@@ -96,7 +134,7 @@ switch ($e->name) {
 					$minifiedScripts['head'] .= implode("\r\n", $registeredScripts['head']) . "\r\n";
 				}
 				if (count($registeredScripts['body_external'])) {
-					$minifiedScripts['body'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['body_nomin']) . '" type="text/javascript"></script>' . "\r\n";
+					$minifiedScripts['body'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['body_external']) . '" type="text/javascript"></script>' . "\r\n";
 				}
 				if (count($registeredScripts['body_jsmingroup'])) {
 					$minifiedScripts['body'] .= '<script src="' . $minPath . '?b=' . $groupFolder . '&amp;f=' . implode(',', $registeredScripts['body_jsmingroup']) . '" type="text/javascript"></script>' . "\r\n";
@@ -110,7 +148,6 @@ switch ($e->name) {
 				if (count($registeredScripts['body'])) {
 					$minifiedScripts['body'] .= "\r\n" . implode("\r\n", $registeredScripts['body']);
 				}
-			}
 
 			// insert minified scripts
 			if (isset($minifiedScripts['head'])) {
