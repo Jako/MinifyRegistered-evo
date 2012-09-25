@@ -22,7 +22,7 @@
  */
 $groupJs = (isset($groupJs)) ? (bool) $groupJs : true;
 $groupFolder = (isset($groupFolder)) ? $groupFolder : 'assets/js';
-$minPath = (isset($minPath)) ? (bool) $minPath : '/min/';
+$minPath = (isset($minPath)) ? $minPath : '/min/';
 $excludeJs = (isset($excludeJs)) ? $excludeJs : '';
 
 $excludeJs = ($excludeJs != '') ? explode(',', $excludeJs) : array();
