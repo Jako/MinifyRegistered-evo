@@ -20,7 +20,7 @@
  *              https://github.com/mrclay/minify in the folder /min or in the
  *              webroot (the path could be changed in plugin configuration).
  */
-$groupJs = (isset($groupJs)) ? (bool) $groupJs : true;
+$groupJs = (isset($groupJs) && $groupJs == 'no') ? false : true;
 $groupFolder = (isset($groupFolder)) ? $groupFolder : 'assets/js';
 $minPath = (isset($minPath)) ? $minPath : '/min/';
 $excludeJs = (isset($excludeJs)) ? $excludeJs : '';
