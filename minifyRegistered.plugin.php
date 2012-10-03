@@ -91,6 +91,7 @@ switch ($e->name) {
 				}
 			}
 
+			$conditional = FALSE;
 			// body scripts
 			foreach ($scripts as $scriptSrc) {
 				if (preg_match('/<!--\[if /', trim($scriptSrc), $tag) || $conditional) {
