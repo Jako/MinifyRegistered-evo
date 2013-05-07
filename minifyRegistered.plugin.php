@@ -3,12 +3,12 @@
  * MinifyRegistered
  *
  * @category 	plugin
- * @version 	0.2.2
+ * @version 	0.2.3
  * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author		Jako (thomas.jakobi@partout.info)
  *
  * @internal    Description: 
- *              <strong>0.2.2</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
+ *              <strong>0.2.3</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
  * @internal    Plugin code:
  *              include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
  * @internal	Events: 
@@ -29,28 +29,27 @@ $excludeJs = ($excludeJs != '') ? explode(',', $excludeJs) : array();
 
 $e = &$modx->Event;
 switch ($e->name) {
+	case 'OnLoadWebDocument': {
+			// get output
+			$output = &$modx->documentContent;
+			// generate marker at the end of the head and body
+			$output = str_replace('</head>', '##MinifyRegisteredHead##' . "\n" . '</head>', $output);
+			$output = str_replace('</body>', '##MinifyRegisteredBody##' . "\n" . '</body>', $output);
+
+			break;
+		}
 	case 'OnWebPagePrerender' : {
 			$registeredScripts = array();
 
 			// get output and registered scripts
 			$output = &$modx->documentOutput;
-			$clientStartupScripts = $modx->getRegisteredClientStartupScripts();
-			$clientScripts = $modx->getRegisteredClientScripts();
-
-			// remove inserted registered scripts
-			if ($clientStartupScripts) {
-				$output = str_replace($clientStartupScripts . "\n", '', $output);
-			}
-			if ($clientScripts) {
-				$output = str_replace($clientScripts . "\n", '', $output);
-			}
-			// if minified scripts not cached, collect them
-			$startupScripts = explode("\n", $clientStartupScripts);
-			$scripts = explode("\n", $clientScripts);
+			$startupScripts = explode("\n", $modx->getRegisteredClientStartupScripts());
+			$scripts = explode("\n", $modx->getRegisteredClientScripts());
 
 			$conditional = FALSE;
 			// startup scripts
 			foreach ($startupScripts as $scriptSrc) {
+				$tag = array();
 				if (preg_match('/<!--\[if /', trim($scriptSrc), $tag) || $conditional) {
 					// don't touch conditional css/scripts
 					$registeredScripts['head'][] = $scriptSrc;
@@ -60,6 +59,7 @@ switch ($e->name) {
 					}
 				} else {
 					preg_match('/^<(script|link)[^>]+>/', trim($scriptSrc), $tag);
+					$src = array();
 					if (preg_match('/(src|href)=\"([^\"]+)/', $tag[0], $src)) {
 						// if there is a filename referenced in the registered line
 						if (substr(trim($src[2]), -3) == '.js') {
@@ -171,10 +171,10 @@ switch ($e->name) {
 
 			// insert minified scripts
 			if (isset($minifiedScripts['head'])) {
-				$output = str_replace('</head>', $minifiedScripts['head'] . '</head>', $output);
+				$output = preg_replace('!(##MinifyRegisteredHead##.*)</head>!s', $minifiedScripts['head'] . '</head>', $output);
 			}
 			if (isset($minifiedScripts['body'])) {
-				$output = str_replace('</body>', $minifiedScripts['body'] . '</body>', $output);
+				$output = preg_replace('!(##MinifyRegisteredBody##.*)</body>!s', $minifiedScripts['body'] . '</body>', $output);
 			}
 			break;
 		}

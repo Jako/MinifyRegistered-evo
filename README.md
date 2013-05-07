@@ -16,7 +16,7 @@ Installation
 ```
 include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
 ```
-3. Check the event `OnWebPagePrerender` in the plugin configuration (Note 1).
+3. Check the event `OnLoadWebDocument` and `OnWebPagePrerender` in the plugin configuration (Note 1).
 
 Parameters
 --------------------------------------------------------------------------------
