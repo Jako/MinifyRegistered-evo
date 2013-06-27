@@ -3,17 +3,17 @@
  * MinifyRegistered
  *
  * @category 	plugin
- * @version 	0.2.3
+ * @version 	0.2.4
  * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author		Jako (thomas.jakobi@partout.info)
  *
- * @internal    Description: 
- *              <strong>0.2.3</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
+ * @internal    Description:
+ *              <strong>0.2.4</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
  * @internal    Plugin code:
  *              include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
- * @internal	Events: 
+ * @internal	Events:
  *              OnWebPagePrerender
- * @internal	Configuration: 
+ * @internal	Configuration:
  *              &groupJs=Group minified files in `groupFolder`:;list;yes,no;yes &groupFolder=Group files in this folder with `groupJs` enabled:;text;assets/js &minPath=Path to a working minify installation:;text;/min/ &excludeJs=Comma separated list of files (including pathnames) not to be minified:;text;
  *
  * @internal    The Plugin needs a working installation of
@@ -32,6 +32,10 @@ switch ($e->name) {
 	case 'OnLoadWebDocument': {
 			// get output
 			$output = &$modx->documentContent;
+			// replace chunks
+			foreach ($modx->chunkCache as $key => $value) {
+				$output = str_replace('{{' . $key . '}}', $value, $output);
+			}
 			// generate marker at the end of the head and body
 			$output = str_replace('</head>', '##MinifyRegisteredHead##' . "\n" . '</head>', $output);
 			$output = str_replace('</body>', '##MinifyRegisteredBody##' . "\n" . '</body>', $output);

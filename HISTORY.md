@@ -1,8 +1,10 @@
 History
 ================================================================================
 
+- 0.2.4
+    - replace chunks before setting markers
 - 0.2.3
-    - bugfix: using markers instead of removing registered scripts directly
+    - using markers instead of removing registered scripts directly
 - 0.2.2
     - bugfix: conditional lines are ignored 
 - 0.2.1
