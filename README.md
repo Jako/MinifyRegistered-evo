@@ -14,7 +14,7 @@ Installation
 1. Upload all files into the new folder *assets/plugins/minifyregistered*
 2. Create a new plugin called minifyRegistered with the following code
 ```
-include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
+include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyregistered.plugin.php');
 ```
 3. Check the event `OnLoadWebDocument` and `OnWebPagePrerender` in the plugin configuration (Note 1).
 
