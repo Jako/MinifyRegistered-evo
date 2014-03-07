@@ -1,6 +1,8 @@
 History
 ================================================================================
 
+- 0.2.5
+    - new: external css files are not minified
 - 0.2.4
     - replace chunks before setting markers
 - 0.2.3

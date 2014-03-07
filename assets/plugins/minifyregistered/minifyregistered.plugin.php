@@ -3,12 +3,12 @@
  * MinifyRegistered
  *
  * @category 	plugin
- * @version 	0.2.4
+ * @version 	0.2.5
  * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author		Jako (thomas.jakobi@partout.info)
  *
  * @internal    Description:
- *              <strong>0.2.4</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
+ *              <strong>0.2.5</strong> collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
  * @internal    Plugin code:
  *              include(MODX_BASE_PATH.'assets/plugins/minifyregistered/minifyRegistered.plugin.php');
  * @internal	Events:
@@ -84,6 +84,9 @@ switch ($e->name) {
 						} elseif (substr(trim($src[2]), -4) == '.css') {
 							// minify css
 							$registeredScripts['head_cssmin'][] = $src[2];
+						} elseif (strpos($tag[0], 'rel="stylesheet"') !== FALSE) {
+							// do not minify external css files (i.e. Google font files)
+							$registeredScripts['head_cssnomin'][] = $src[2];
 						} else {
 							// do not minify any other file
 							$registeredScripts['head_nomin'][] = $src[2];
@@ -141,6 +144,9 @@ switch ($e->name) {
 			// prepare the output of the registered blocks
 			if (count($registeredScripts['head_cssmin'])) {
 				$minifiedScripts['head'] .= '<link href="' . $minPath . '?f=' . implode(',', $registeredScripts['head_cssmin']) . '" rel="stylesheet" type="text/css" />' . "\r\n";
+			}
+			if (count($registeredScripts['head_cssnomin'])) {
+				$minifiedScripts['head'] .= '<link href="' . implode('" rel="stylesheet" type="text/css" />' . "\r\n" . '<link href="', $registeredScripts['head_cssnomin']) . '" rel="stylesheet" type="text/css" />' . "\r\n";
 			}
 			if (count($registeredScripts['head_external'])) {
 				$minifiedScripts['head'] .= '<script src="' . implode('" type="text/javascript"></script>' . "\r\n" . '<script src="', $registeredScripts['head_external']) . '" type="text/javascript"></script>' . "\r\n";

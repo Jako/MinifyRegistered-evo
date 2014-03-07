@@ -5,7 +5,7 @@
  * Collect the registered javascripts and css files and minify them by minify (https://github.com/mrclay/minify)
  *
  * @category	plugin
- * @version 	0.2.4
+ * @version 	0.2.5
  * @license 	http://www.gnu.org/copyleft/gpl.html GNU Public License (GPL)
  * @author      Jako
  * @internal    @properties &groupJs=Group minified files in `groupFolder`:;list;yes,no;yes &groupFolder=Group files in this folder with `groupJs` enabled:;text;assets/js &minPath=Path to a working minify installation:;text;/min/ &excludeJs=Comma separated list of files (including pathnames) not to be minified:;text;
