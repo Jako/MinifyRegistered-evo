@@ -81,11 +81,11 @@ switch ($e->name) {
 								// minify scripts
 								$registeredScripts['head_jsmin'][] = $src[2];
 							}
-						} elseif (substr(trim($src[2]), -4) == '.css') {
-							// minify css
+						} elseif (substr(trim($src[2]), -4) == '.css' || (substr($src[2], 0, 4) !== 'http' && substr($src[2], 0, 2) !== '//')) {
+							// minify internal css files
 							$registeredScripts['head_cssmin'][] = $src[2];
 						} elseif (strpos($tag[0], 'rel="stylesheet"') !== FALSE) {
-							// do not minify external css files (i.e. Google font files)
+							// do not minify all other css files (i.e. Google font files)
 							$registeredScripts['head_cssnomin'][] = $src[2];
 						} else {
 							// do not minify any other file
