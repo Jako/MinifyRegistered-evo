@@ -1,6 +1,8 @@
 History
 ================================================================================
 
+- 0.2.6
+    - new: exclude css files from minify
 - 0.2.5
     - new: external css files are not minified
 - 0.2.4
